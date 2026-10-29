@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="dag1/dag1.csproj" />
+  <Project Path="dag3/dag3.csproj" Id="668ba060-e8dd-459d-9602-274e6cdd638a" />
+  <Project Path="dag4/dag4.csproj" Id="00d0ba57-b4a1-474d-8aed-f3ca7d1a70a3" />
+  <Project Path="day2/day2.csproj" Id="26c18070-6c02-44f1-a51e-a775a1731363" />
+</Solution>
