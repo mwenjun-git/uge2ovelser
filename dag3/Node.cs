@@ -7,18 +7,20 @@ namespace dag3
     //Opgave 2
     public class Node
     {
-        public byte Værdi;       // which byte (only meaningful for leaves)
-        public int Frekvens;     // how often (inner node: sum of children)
-        public int Id;           // Til at afgøre uafgjort: blade = byte-værdien, indre noder = 256, 257, ...
-        public Node? Venstre;   // left child, null if none
-        public Node? Højre;     // right child, null if none
+        public byte Værdi;      // Hvilken byte-værdi (kun relevant for blade)
+        public int Frekvens;    // Hvor mange gange byte-værdien forekommer (indre node: summen af børnenes frekvenser)
+        public int Id;          //Et unikt nummer for noden, som bruges til sortering: blade = byte-værdien, indre noder = 256, 257, ...
+        public Node? Venstre;   // Venstre barn, null hvis der ikke er et.
+        public Node? Højre;     // Højre barn, null hvis der ikke er et.
 
-        public bool ErBlad
+
+        //Kontrollerer, om den aktuelle Node er en bladnode
+        public bool ErBlad  //Denne kode returnerer automatisk true eller false
         {
             get { return Venstre == null && Højre == null; }
         }
 
-        // Konstruktør til blade
+        // Konstruktør til blade (Opretter en bladnode.)
         public Node(byte værdi, int frekvens)
         {
             Værdi = værdi;
@@ -29,14 +31,16 @@ namespace dag3
         // Konstruktør til indre noder
         public Node(Node venstre, Node højre, int id)
         {
+            //Modtager en venstre node
             Venstre = venstre;
+            //Modtager en højre node
             Højre = højre;
-            // Constructor for an inner node: frequency = sum of the two children
+            // Frekvensen er summen af de to børns frekvenser
             Frekvens = venstre.Frekvens + højre.Frekvens;
-            Id = id;
+            Id = id; //Et unikt nummer for noden, som bruges til sortering
         }
 
-        // lav evt en ToString
+      
     }
 }
 

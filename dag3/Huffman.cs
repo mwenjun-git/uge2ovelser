@@ -5,10 +5,10 @@ using System.Text;
 
 namespace dag3
 {
-    internal class Huffman
+    public class Huffman
     {
-        // Opgave 3 and 4: Build the Huffman tree
-        // Return a Node or null
+        // Opgave 3 og 4: Bygger Huffman-træet
+        // Returnerer en Node eller null
         public static Node? BygTræ(Dictionary<byte, int> frekvenser)
         {
             // Create a list to store all nodes
@@ -17,6 +17,7 @@ namespace dag3
             // Create a leaf node for each byte and its frequency
             foreach ((byte k, int v) in frekvenser)
             {
+                //k er byte-værdien. v er frekvensen (antal gange, byte-værdien forekommer)
                 var node = new Node(k, v);
                 noder.Add(node);
             }
@@ -180,6 +181,91 @@ namespace dag3
 
             // Return the decoded bytes
             return resultat.ToArray();
+        }
+
+        // Komprimerer data til et byte-array = header + Huffman-kodede bits
+        public static byte[] KomprimerTilBytes(byte[] data)
+        {
+            // Tæller frekvenser i en int[256] (bruges til headeren)
+            int[] freq = new int[256];
+            foreach (byte b in data)
+            {
+                freq[b]++; // Byte-værdien bruges som plads
+            }
+
+            // Laver en Dictionary med kun de bytes, der forekommer
+            var dict = new Dictionary<byte, int>();
+            for (int i = 0; i < 256; i++)
+            {
+                if (freq[i] > 0)
+                {
+                    dict[(byte)i] = freq[i];
+                }
+            }
+
+            // Bygger træet og danner koderne
+            Node? rod = BygTræ(dict);
+            string[] koder = new string[256];
+            DanKoder(rod, "", koder);
+
+            // Skriver hver kode som bits med BitSkriver
+            var skriver = new dag4.BitSkriver();
+            foreach (byte b in data)
+            {
+                skriver.SkrivKode(koder[b]);
+            }
+            byte[] bitData = skriver.TilArray(); // Fylder op med 0-bits
+
+            // Laver headeren (længde + frekvenstabel)
+            byte[] header = dag4.Header.LavHeader(data, freq);
+
+            // Samler header og bit-data
+            byte[] resultat = new byte[header.Length + bitData.Length];
+            Array.Copy(header, 0, resultat, 0, header.Length);
+            Array.Copy(bitData, 0, resultat, header.Length, bitData.Length);
+            return resultat;
+        }
+
+        // Dekomprimerer et byte-array lavet af KomprimerTilBytes
+        public static byte[] DekomprimerFraBytes(byte[] fil)
+        {
+            // Læser headeren: oprindelig længde og frekvenstabel
+            int[] freq = new int[256];
+            int længde = dag4.Header.LæsHeader(fil, freq);
+
+            // Bygger præcis samme træ som kompressoren
+            var dict = new Dictionary<byte, int>();
+            for (int i = 0; i < 256; i++)
+            {
+                if (freq[i] > 0)
+                {
+                    dict[(byte)i] = freq[i];
+                }
+            }
+            Node? rod = BygTræ(dict);
+
+            byte[] resultat = new byte[længde];
+            if (rod == null) return resultat; // Tom fil
+
+            // Specialtilfælde: kun én slags byte
+            if (rod.ErBlad)
+            {
+                Array.Fill(resultat, rod.Værdi);
+                return resultat;
+            }
+
+            // Læser bits efter headeren (plads 1028)
+            var læser = new dag4.BitLæser(fil, 4 + 256 * 4);
+            for (int i = 0; i < længde; i++)
+            {
+                Node aktuel = rod;
+                while (!aktuel.ErBlad)
+                {
+                    aktuel = læser.LæsBit() == 0 ? aktuel.Venstre! : aktuel.Højre!;
+                }
+                resultat[i] = aktuel.Værdi;
+            }
+            return resultat;
         }
     }
 }

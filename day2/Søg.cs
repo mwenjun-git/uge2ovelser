@@ -5,7 +5,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace dag2
 {
-    internal class Søg
+    public class Søg
     {
         public static int BinSøg(int[] høstak, int nål)
         {
@@ -38,26 +38,35 @@ namespace dag2
             }
             return -1;
         }
-
-        int[] TælFrekvenser(byte[] data)
-        {
-            int[] count = new int[256];
-            foreach (byte b in data)
-            { // use the byte value as the index, add 1
-                count[b]++;
+        // Opgave1 
+        // Bruger byte-værdien som indeks i arrayet og tæller 1 op.fx antal[65]---3
+        // Byte-værdien bruges som indeks i arrayet,Selv hvis en byte-værdi aldrig forekommer, har den stadig en plads i arrayet, og værdien er 0.
+        public static int[] TælFrekvenser(byte[] data)
+        { // Opretter et array med 256 pladser, alle starter på 0
+            int[] antal = new int[256];
+            {    // Gennemgår hver byte i data
+                foreach (byte b in data)
+                { // use the byte value as the index, add 1
+                    antal[b]++;
+                }
             }
-            return count;
-        }
+            // Returnerer frekvenstabellen
+            return antal;
 
+        }
+    
+
+        // Klassen skal være public static, så metoderne kan kaldes uden søg 
         public static Dictionary<byte, int> TælFrekvenserDictionary(byte[] data)
-        {  // 1. create the counter: key = byte value, value = how many times it appears
+        {  // 1.Opretter en tom Dictionary: key = byte value, value = how many times it appears
             var antal = new Dictionary<byte, int>();
-            // Go through every byte in the input data
+            // Gennemgår hver byte i data
             foreach (byte b in data)
-            {   // Check whether this byte has been seen before
+
+            {    // Hvis byten allerede er set
                 if (antal.ContainsKey(b))
                 {// Seen before: add 1 to its count
-                    antal[b]++;                                    // fix 4
+                    antal[b]++;                                    
                 }
                 else
                 {// First time we see this byte: start its count at 1
@@ -68,7 +77,7 @@ namespace dag2
             return antal;
         }
         // Task 2: count how many times each word appears in the text.
-        // The two lists are parallel: ord[i] has been seen antal[i] times.
+        // The two lists are  ord[i] has been seen antal[i] times.
         public static void TælOrd(string[] tekst, List<string> ord, List<int> antal)
         {
             // Go through every word in the input
@@ -101,33 +110,89 @@ namespace dag2
                 }
             }
         }
-        // Task 3: count how many times each word appears, using a Dictionary.
+        // Opgave 3: Tæller hvor mange gange hvert ord forekommer, med en Dictionary
         // Key = the word, value = how many times it appears.
+        // Opretter en tom Dictionary: nøgle = ord, værdi = antal
         public static Dictionary<string, int> TælOrdDictionary(string[] tekst)
         {
-            // Create the empty counter
+            // Opretter en tom Dictionary: nøgle = ord, værdi = antal
             var antal = new Dictionary<string, int>();
 
-            // Go through every word in the input
+            // Gennemgår hvert ord
             foreach (string ordet in tekst)
-            {
+            { // Hvis ordet allerede findes
                 if (antal.ContainsKey(ordet))
                 {
-                    // Seen before: add 1 to its count
+                    // Øger antallet med 1
                     antal[ordet]++;
                 }
                 else
                 {
-                    // First time we see this word: start its count at 1
+                    // Første gang: opretter ordet med værdien 1
                     antal[ordet] = 1;
                 }
             }
 
-            // Return the finished word-frequency table
+            // Returnerer Dictionary'en
             return antal;
         }
+        // Opgave 6: Selection sort - sorterer et int-array fra mindst til størst   int[] tal = { 8, 3, 6, 1, 5 };
+        public static void SelectionSort(int[] tal)
+        {
+            // Ydre løkke: plads i er det sted, hvor det næste mindste tal skal stå
+            // Vi stopper ved Length - 1, fordi det sidste tal automatisk står rigtigt
+            for (int i = 0; i < tal.Length - 1; i++)
+            {
+                // Antager først, at det mindste tal står på plads i
+                int minIndex = i;
 
+                // Indre løkke: leder efter et mindre tal blandt de resterende
+                for (int j = i + 1; j < tal.Length; j++)
+                {
+                    // Hvis tallet på plads j er mindre end det mindste vi har fundet indtil nu
+                    if (tal[j] < tal[minIndex])
+                    {
+                        minIndex = j; // Gemmer pladsen på det nye mindste tal
+                    }
+                }
+
+                // Bytter det mindste tal ind på plads i
+                int temp = tal[i];          // Gemmer tallet på plads i midlertidigt
+                tal[i] = tal[minIndex];     // Lægger det mindste tal på plads i
+                tal[minIndex] = temp;       // Lægger det gamle tal, hvor det mindste stod
+            }
+        }
+        // Opgave 7: Selection sort - sorterer efter frekvens, største først
+        public static void SorterEfterFrekvens(byte[] værdier, int[] antal) // To parallelle arrays: byte-værdi og antal  65(A)---3
+        {
+            // Ydre løkke: Antager, at byte-værdien på plads i har det højeste antal
+            for (int i = 0; i < antal.Length - 1; i++)
+            {
+                int maxIndex = i; // Antager først, at den hyppigste står på plads i
+
+                // Indre løkke: leder efter en hyppigere byte blandt resten
+                for (int j = i + 1; j < antal.Length; j++)
+                {
+                    // Hvis plads j har et STØRRE antal end det største fundet indtil nu
+                    if (antal[j] > antal[maxIndex])
+                    {
+                        maxIndex = j; // Gemmer pladsen på det nye største antal
+                    }
+                } // Slut på indre løkke
+
+                // Bytter antallene
+                int tempAntal = antal[i];          // Gemmer antallet på plads i midlertidigt
+                antal[i] = antal[maxIndex];        // Lægger det største antal på plads i
+                antal[maxIndex] = tempAntal;       // Lægger det gamle antal, hvor det største stod
+
+                // Bytter også byte-værdierne, så de følger med deres antal
+                byte tempVærdi = værdier[i];       // Gemmer byte-værdien på plads i midlertidigt
+                værdier[i] = værdier[maxIndex];    // Flytter den hyppigste byte til plads i
+                værdier[maxIndex] = tempVærdi;     // Lægger den gamle byte, hvor den hyppigste stod
+            } // Slut på ydre løkke
+        } // Slut på metoden
     }
+    
 }
 
 
